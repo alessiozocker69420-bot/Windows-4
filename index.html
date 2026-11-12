@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#ff1b2d">
+  <title>Opera GX Virtual PC</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="styles/desktop.css">
+  <link rel="stylesheet" href="styles/windows.css">
+  <link rel="stylesheet" href="styles/apps.css">
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml">
+</head>
+<body>
+  <!-- Stage 1: BIOS / POST -->
+  <div id="bios-screen" class="bios-screen">
+    <pre id="bios-text" class="bios-text"></pre>
+  </div>
+
+  <!-- Stage 2: Opera GX Boot Logo -->
+  <div id="boot-screen" class="boot-screen hidden">
+    <div class="boot-logo">
+      <div class="gx-logo">
+        <svg viewBox="0 0 120 120" width="100" height="100">
+          <circle cx="60" cy="60" r="54" fill="none" stroke="#ff1b2d" stroke-width="4"/>
+          <path d="M35 70 Q60 20 85 70 Q60 95 35 70" fill="#ff1b2d"/>
+          <circle cx="60" cy="58" r="12" fill="#0d0d0d"/>
+        </svg>
+      </div>
+      <div class="boot-text gx-title">OPERA <span>GX</span></div>
+      <div class="boot-sub">Gaming Browser System</div>
+      <div class="boot-bar"><div class="boot-bar-fill" id="boot-bar-fill"></div></div>
+      <div class="boot-status" id="boot-status">System wird gestartet…</div>
+    </div>
+  </div>
+
+  <!-- Stage 3: Login -->
+  <div id="login-screen" class="login-screen hidden">
+    <div class="login-bg"></div>
+    <div class="login-card">
+      <div class="login-avatar">A</div>
+      <div class="login-name">Alessio</div>
+      <div class="login-hint">Opera GX Virtual PC</div>
+      <form id="login-form" autocomplete="off">
+        <input type="password" id="login-password" class="login-input" placeholder="Passwort" autocomplete="off">
+        <div id="login-error" class="login-error"></div>
+        <button type="submit" class="login-btn">Anmelden</button>
+      </form>
+      <div class="login-footer">
+        <span>Passwort steht im Code</span>
+        <span class="login-time" id="login-time"></span>
+      </div>
+    </div>
+  </div>
+
+  <div id="desktop" class="desktop hidden">
+    <div id="wallpaper" class="wallpaper gx-wallpaper"></div>
+    <div id="desktop-icons" class="desktop-icons"></div>
+    <div id="windows-container"></div>
+
+    <div id="start-menu" class="start-menu hidden">
+      <div class="start-menu-header">
+        <div class="user-profile" id="user-profile">
+          <div class="user-avatar">A</div>
+          <span class="user-name">Alessio</span>
+        </div>
+        <button class="power-btn" id="power-btn" title="Ausschalten">⏻</button>
+      </div>
+      <div class="start-search">
+        <input type="text" id="start-search" placeholder="GX suchen…" autocomplete="off">
+      </div>
+      <div class="start-pinned">
+        <div class="section-title">Angeheftet</div>
+        <div id="pinned-apps" class="app-grid"></div>
+      </div>
+      <div class="start-all">
+        <div class="section-title">Alle Apps</div>
+        <div id="all-apps" class="app-list"></div>
+      </div>
+    </div>
+
+    <div id="notification-center" class="notification-center hidden">
+      <div class="nc-header">
+        <span>Benachrichtigungen</span>
+        <button id="clear-notifications">Alle löschen</button>
+      </div>
+      <div id="notifications-list" class="notifications-list"></div>
+      <div class="quick-settings">
+        <div class="qs-item" data-action="wifi"><span>📶</span><span>WLAN</span></div>
+        <div class="qs-item" data-action="bluetooth"><span>🔵</span><span>Bluetooth</span></div>
+        <div class="qs-item" data-action="airplane"><span>✈️</span><span>Flugmodus</span></div>
+        <div class="qs-item" data-action="night"><span>🌙</span><span>Nachtlicht</span></div>
+        <div class="qs-item" data-action="focus"><span>🎯</span><span>GX Control</span></div>
+        <div class="qs-item" data-action="cast"><span>📺</span><span>Übertragen</span></div>
+      </div>
+      <div class="volume-slider">
+        <span>🔊</span>
+        <input type="range" id="volume-slider" min="0" max="100" value="70">
+        <span id="volume-value">70</span>
+      </div>
+    </div>
+
+    <div id="context-menu" class="context-menu hidden">
+      <div class="ctx-item" data-action="view">Ansicht</div>
+      <div class="ctx-item" data-action="sort">Sortieren nach</div>
+      <div class="ctx-item" data-action="refresh">Aktualisieren</div>
+      <div class="ctx-separator"></div>
+      <div class="ctx-item" data-action="new-folder">Neuer Ordner</div>
+      <div class="ctx-separator"></div>
+      <div class="ctx-item" data-action="personalize">Personalisieren</div>
+      <div class="ctx-item" data-action="display">Anzeigeeinstellungen</div>
+    </div>
+
+    <div id="taskbar" class="taskbar">
+      <div class="taskbar-left">
+        <button id="start-btn" class="taskbar-btn start-btn" title="Start">
+          <svg viewBox="0 0 24 24" width="22" height="22"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/><path d="M7 14 Q12 5 17 14 Q12 18 7 14" fill="currentColor"/></svg>
+        </button>
+        <button id="search-btn" class="taskbar-btn" title="Suche">🔍</button>
+        <button id="task-view-btn" class="taskbar-btn" title="Aufgabenansicht">▦</button>
+      </div>
+      <div id="taskbar-apps" class="taskbar-apps"></div>
+      <div class="taskbar-right">
+        <button id="tray-btn" class="taskbar-btn tray-btn" title="Ausgeblendete Symbole">⌃</button>
+        <div class="system-tray">
+          <span id="wifi-icon" title="WLAN verbunden">📶</span>
+          <span id="volume-icon" title="Lautstärke">🔊</span>
+          <span id="battery-icon" title="Akku">🔋</span>
+        </div>
+        <div id="clock" class="clock" title="Datum und Uhrzeit">
+          <div id="clock-time">00:00</div>
+          <div id="clock-date">01.01.2026</div>
+        </div>
+        <button id="notif-btn" class="taskbar-btn" title="Benachrichtigungen">💬</button>
+      </div>
+    </div>
+  </div>
+
+  <canvas id="matrix-canvas" class="matrix-canvas hidden"></canvas>
+
+  <script src="script.js"></script>
+  <script src="apps/terminal.js"></script>
+  <script src="apps/notes.js"></script>
+  <script src="apps/browser.js"></script>
+  <script src="apps/explorer.js"></script>
+  <script src="apps/calculator.js"></script>
+  <script src="apps/paint.js"></script>
+  <script src="apps/settings.js"></script>
+  <script src="apps/calendar.js"></script>
+  <script src="apps/clock.js"></script>
+  <script src="apps/music.js"></script>
+  <script src="apps/video.js"></script>
+  <script src="apps/image-viewer.js"></script>
+  <script src="apps/notepad.js"></script>
+  <script src="apps/task-manager.js"></script>
+  <script src="apps/app-store.js"></script>
+  <script src="apps/system-info.js"></script>
+  <script src="apps/recycle-bin.js"></script>
+  <script src="apps/screenshot.js"></script>
+  <script src="apps/todo.js"></script>
+  <script src="apps/unit-converter.js"></script>
+  <script src="apps/voice-recorder.js"></script>
+  <script src="apps/converter.js"></script>
+  <script src="apps/minesweeper.js"></script>
+</body>
+</html>
